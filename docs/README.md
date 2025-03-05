@@ -2,7 +2,7 @@
 
 O presente documento é uma resposta ao desafio de Estágio em DevOps. Ele contém uma análise detalhada e técnica do código fornecido, abordando os recursos implementados e suas funcionalidade no código main.tf fornecido, além de apresentar e comentar as modificações realizadas no arquivo. Ao longo do documento estão presentes links que levam a informações mais detalhadas nas documentações em relação as ferramentas ou termos utilizados.
 
-O arquivo modificado está na raiz do diretório como "main.tf", para executá-lo, basta seguir as orientações contidas no tópico 4 deste mesmo readme.md. Enquanto o arquivo original está dentro do diretório docs.
+O arquivo modificado está na raiz do diretório como [main.tf](https://github.com/viniciuslevi/desafio_terraform/tree/main/src/main.tf), para executá-lo, basta seguir as orientações contidas no tópico 4 deste mesmo readme.md. Enquanto o [arquivo original](https://github.com/viniciuslevi/desafio_terraform/blob/main/docs/original-main.tf) está dentro do diretório docs.
 
 ## Contextualização:
 [Terraform](https://developer.hashicorp.com/terraform/intro) é uma ferramenta de software de *Infraestructure as Code* (IaC) designada para automatizar a criação e manutenção de infraestrutura cloud, que se utiliza da linguagem declarativa HCL (HashiCorp Configuration Language) (ou JSON, opcionalmente).
@@ -11,7 +11,7 @@ A ferramenta também contém recursos que permite armazenar estados de component
 
 ## 1. Análise Técnica do Código Terraform
 
-### Trecho 1: [Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+### 1.1 - [Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
 ```tf
 provider "aws" {
   region = "us-east-1"
@@ -22,7 +22,7 @@ Define o provedor de recursos de recursos e a região de operação. Com o prove
 
 Para usar a AWS, é necessário configurar previamente as credencias de acesso pelo AWS CLI. O Terraform pode usar as credenciais armazenadas do AWS CLI para executar o código.
 
-### Trecho 2: Variable
+### 1.2 - Variable
 ```tf
 variable "projeto" {
   description = "Nome do projeto"
@@ -38,7 +38,7 @@ variable "candidato" {
 ```
 Os dois blocos criam duas variáveis cada: "projeto" e "candidato". Em ambas, são incluidas também os atributos: description (descrição), type (tipo) e default (nome).
 
-### Trecho 3: EC2-key
+### 1.3 - EC2-key
 ```tf
 resource "tls_private_key" "ec2_key" {
   algorithm = "RSA"
@@ -55,7 +55,7 @@ O primeiro bloco define uma chave privada usando o algoritmo _RSA_ e o tamanho d
 
 O segundo bloco cria um par de chaves na _AWS_ para uso em instâncias _EC2_. Também atribui o nome como a concatenação dos nomes do projeto e candidato e define a chave pública do par atribuindo o recurso _public_key_openssh_.
 
-### Trecho 4: VPC
+### 1.4 - VPC
 ```tf
 resource "aws_vpc" "main_vpc" {
   cidr_block           = "10.0.0.0/16"
@@ -70,7 +70,7 @@ resource "aws_vpc" "main_vpc" {
 
 Define uma [VPC](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) (Virtual Private Cloud), uma rede virtual isolada na AWS, com [CIDR](https://aws.amazon.com/pt/what-is/cidr/) (Encaminhamento Entre Domínios Sem Classificação) 10.0.0.0/16. Ou seja, com os primeiros 16 bits (10.0) sendo o endereço da rede.
 
-### Trecho 5: Subnet
+### 1.5 - Subnet
 ```tf
 resource "aws_subnet" "main_subnet" {
   vpc_id            = aws_vpc.main_vpc.id
@@ -84,7 +84,7 @@ resource "aws_subnet" "main_subnet" {
 ```
 Cria uma [Subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet), que estará dentro da VPC criada no trecho 4, vinculada pelo _vpc_id_. O endereço da subnet é 10.0.1 (24 bits), definido no _cidr_block_ e a zona é configurada para "us-east-1a".
 
-### Trecho 6: Gateway
+### 1.6 - Gateway
 ```tf
 resource "aws_internet_gateway" "main_igw" {
   vpc_id = aws_vpc.main_vpc.id
@@ -97,7 +97,7 @@ resource "aws_internet_gateway" "main_igw" {
 Cria o recurso [Gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway), responsável por permitir que instâncias da VPC se liguem a internet.
 Internet Gateway é o _destino_ para o tráfego que precisa sair para a internet.
 
-### Trecho 7:
+### 1.7 - Route Table:
 ```tf
 resource "aws_route_table" "main_route_table" {
   vpc_id = aws_vpc.main_vpc.id
@@ -125,7 +125,7 @@ O primeiro bloco cria o recurso de tabela de roteamento, que servirá para forne
 
 O segundo bloco permite especificar qual tabela de roteamento deve ser usada para rotear o tráfego da sub-rede. No código, é vinculada a subnet, a mesma tabela da VPC.
 
-### Trecho 8: Security Group
+### 1.8 - Security Group
 ```tf
 resource "aws_security_group" "main_sg" {
   name        = "${var.projeto}-${var.candidato}-sg"
@@ -161,7 +161,7 @@ O bloco em questão cria um Security Group, e vincula a VPC criada anteriormente
 
 A primeira regra "ingress" permite entrada de qualquer IP à porta 22, que é usada pelo serviço de SSH. Já a segunda, permite saída do tráfego para qualquer IP em todas as portas e todos os protocolos.
 
-### Trecho 9: AMI
+### 1.9 - AMI
 ```tf
 data "aws_ami" "debian12" {
   most_recent = true
@@ -181,7 +181,7 @@ data "aws_ami" "debian12" {
 ```
 Cria uma imagem usando o recruso _aws_ami_ (Amazon Machine Image), configurando-a para debian na versão 12.
 
-### Trecho 10: Instância EC2
+### 1.10 - Instância EC2
 ```tf
 resource "aws_instance" "debian_ec2" {
   ami             = data.aws_ami.debian12.id
@@ -215,7 +215,7 @@ Também associa um ip público, define o volume e tipo do armazenamento e se dev
 
 No user_data contém o script que irá rodar assim que o processo de criação da máquina for finalizado. O Script que é lançado com o Shebang especificando o interpretador bash, é seguido por comandos para atualizar o S.O.
 
-### Trecho 11: Outputs
+### 1.11 - Outputs
 ```tf
 output "private_key" {
   description = "Chave privada para acessar a instância EC2"
@@ -231,9 +231,9 @@ output "ec2_public_ip" {
 ```
 Os dois blocos produzem logs no terminal, ao rodar _terraform apply_. O primeiro se trata da chave privada de acesso SSH a máquina EC2 criada, a segunda imprime o IP público.
 
-### Observações
+### 1.12 - Observações
 Alguns trechos do código tinham alguns erros de sintaxe, detectado pela ferramenta (terraform).
-#### Trecho 7 - Bloco 1:
+#### Trecho 7 (1.7) - Bloco 1:
 ```tf
 resource "aws_route_table_association" "main_association" {
   subnet_id      = aws_subnet.main_subnet.id
@@ -246,7 +246,7 @@ resource "aws_route_table_association" "main_association" {
 ```
 Pela [documentação](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association), o recurso _aws_route_table_ não possui o argumento **_tags_**. No arquivo modificado, o argumento foi retirado.
 
-#### Trecho 10:
+#### Trecho 10 (1.10):
 ```tf
 resource "aws_instance" "debian_ec2" {
   ami             = data.aws_ami.debian12.id
@@ -279,6 +279,7 @@ Pela [documentação](https://registry.terraform.io/providers/hashicorp/aws/late
 
 
 ## 2. Modificações e Melhorias do Código Terraform
+As modificações destacadas a seguir, foram todas incluídas no documento modificado [main.tf](https://github.com/viniciuslevi/desafio_terraform/tree/main/src/main.tf). A forma como estão apresentadas aqui não é exatamente como está no main.tf, porque aqui prioriza-se a apresentação de cada modificação realizada. Entretanto, todas as configurações são identicas.
 
 ### 2.1 - Aplicação de melhorias de segurança
 
@@ -303,7 +304,7 @@ Uma prática interessante com relação a conexão via SSH, seria restringir o a
 
 Uma outra alteração no código com relação a EC2 para segurança podem ser implementadas no _user_data_: 
 
-- Instalar e configurar **_fail2ban_** para proteção SSH pode previnir ataques bem sucedidos via força bruta.
+- Instalar e configurar **_fail2ban_** para proteção SSH pode previnir ataques bem sucedidos via força bruta. 
 ```tf
 sudo apt-get fail2ben
 
@@ -394,20 +395,7 @@ Foi implementado mais duas regras de acesso ao security group. A regra descrita 
 
 #### Alteração 2:
 ```tf
-resource "aws_instance" "debian_ec2" {
-  ami             = data.aws_ami.debian12.id
-  instance_type   = "t2.micro"
-  subnet_id       = aws_subnet.main_subnet.id
-  key_name        = aws_key_pair.ec2_key_pair.key_name
-  vpc_security_group_ids = [aws_security_group.main_sg.id]
-  associate_public_ip_address = true
-
-  root_block_device {
-    volume_size           = 20
-    volume_type           = "gp2"
-    delete_on_termination = true
-  }
-
+# [...] código acima
   user_data = <<-EOF
               #!/bin/bash
               export DEBIAN_FRONTEND=noninteractive
@@ -436,13 +424,10 @@ resource "aws_instance" "debian_ec2" {
               echo "User data script completed"
               EOF
 
-  tags = {
-    Name = "${var.projeto}-${var.candidato}-ec2"
-    Service = "nginx"
-  }
-}
+# [...] mais código abaixo
+
 ```
-A segunda e mais significativa alteração é em relação ao _`user_data`_, que agora inclui também no seu script, a instalação da ferramenta (nginx), seguido por comandos que ativam o serviço. O conteúdo do HTML padrão do nginx também é alterado, somente pra título de visualização.
+A segunda e mais significativa alteração é em relação ao _`user_data`_, que agora inclui também no seu script, a instalação da ferramenta nginx, seguido por comandos que ativam o serviço. O conteúdo do HTML padrão do nginx também é alterado, somente pra título de visualização.
 
 Vale ressaltar que flags do DPKG e configurações de terminal não interativo foram adicionados, pois no momento em que testava o código, identifiquei que as demais tarefas do script abaixo dos comandos de atualização não estavam sendo realizadas pelo terminal  estar aguardando uma confirmação mesmo com a flag -y aplicada a apt-get update e apt-get upgrade.
 
@@ -455,6 +440,19 @@ output "nginx_url" {
 ```
 Ao rodar com _terraform apply_, além da private_key e do IP é impresso o link para acesso.
 
+
+
+### Outras alterações
+
+Uma outra modificação implementada, mas que interfere apenas na organização do código é a separação do script contido em _user_data_ em outro arquivo, denominado _userdata.sh_. O arquivo é então chamado no bloco de recurso do EC2 e carregado no momento da execução.
+
+```tf
+  # Script de inicialização da instancia
+  user_data = templatefile("./userdata.sh", { 
+    candidato = var.candidato
+  })
+```
+É uma boa prática separar o arquivo terraform em varios outros: variaveis.tf, outputs.tf e etc. Mas como não tivemos muitos destes componentes, optei por deixa-los todos num único arquivo e separar somente o script do _user_data_.
 
 ## 3. Instruções de Uso
 
@@ -472,7 +470,7 @@ Este guia fornece instruções passo a passo para implantar o projeto de infraes
 #### 1. Clone o Repositório
 ```bash
 git clone https://github.com/username/desafioTerraform.git
-cd desafioTerraform
+cd desafioTerraform/src
 ```
 #### 2. Configure as Credenciais AWS
 
