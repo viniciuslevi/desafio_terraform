@@ -11,14 +11,14 @@ A ferramenta também contém recursos que permite armazenar estados de component
 
 ## 1. Análise Técnica do Código Terraform
 
-### 1.1 - [Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+### 1.1 - Provider
 ```tf
 provider "aws" {
   region = "us-east-1"
 }
 ```
 
-Define o provedor de recursos de recursos e a região de operação. Com o provedor de recursos definido, o Terraform se encarrega de baixar as dependências relacionadas.
+Define o provedor de recursos ([provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)) e a região de operação. Com o provedor de recursos definido, o Terraform se encarrega de baixar as dependências relacionadas.
 
 Para usar a AWS, é necessário configurar previamente as credencias de acesso pelo AWS CLI. O Terraform pode usar as credenciais armazenadas do AWS CLI para executar o código.
 
@@ -157,7 +157,7 @@ resource "aws_security_group" "main_sg" {
   }
 }
 ```
-O bloco em questão cria um Security Group, e vincula a VPC criada anteriormente. Em seguida, inclui ao grupo regras de restrição de entrada e saída. 
+O bloco em questão cria um [Security Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group), e vincula a VPC criada anteriormente. Em seguida, inclui ao grupo regras de restrição de entrada e saída. 
 
 A primeira regra "ingress" permite entrada de qualquer IP à porta 22, que é usada pelo serviço de SSH. Já a segunda, permite saída do tráfego para qualquer IP em todas as portas e todos os protocolos.
 
@@ -583,12 +583,13 @@ terraform destroy
 ```
 Digite `yes` quando solicitado para confirmar.
 
-#### 12. Estrutura do Repositório
+#### 12. Estrutura do diretório /src:
 
-- [main.tf](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html) - Arquivo principal de configuração do Terraform
-- [terraform.tfstate](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html) - Arquivo de estado (criado após aplicação)
-- [terraform.tfstate.backup](vscode-file://vscode-app/usr/share/code/resources/app/out/vs/code/electron-sandbox/workbench/workbench.html) - Backup do estado anterior
+- main.tf - Arquivo principal de configuração do Terraform
+- userdata.sh - Arquivo shell que contém o script de user_data
+- terraform.tfstate - Arquivo de estado (criado após aplicação)
+- terraform.tfstate.backup - Backup do estado anterior
 
 #### Nota de Segurança
 
-Lembre-se de nunca enviar credenciais AWS ou chaves privadas para o GitHub. O arquivo `.gitignore` deve excluir arquivos `.pem` e `.tfstate`.
+Lembre-se de nunca enviar credenciais AWS ou chaves privadas para o GitHub. 
