@@ -544,6 +544,8 @@ Após a implantação bem-sucedida, o Terraform exibirá:
 - URL para acessar o servidor Nginx
 - Chave privada para acesso SSH (sensível)
 
+Lembre de aguardar alguns segundos para que a página do nginx apareça na URL. Caso isso não ocorra, siga para o tópico de solução de problemas.
+
 ##### Salve a Chave Privada para Acesso SSH
 ```bash
 terraform output -raw private_key > key.pem
