@@ -304,7 +304,7 @@ Uma prática interessante com relação a conexão via SSH, seria restringir o a
 
 Uma outra alteração no código com relação a EC2 para segurança podem ser implementadas no _user_data_: 
 
-- Instalar e configurar **_fail2ban_** para proteção SSH pode previnir ataques bem sucedidos via força bruta. 
+- Instalar e configurar **_fail2ban_** para proteção SSH pode previnir ataques bem sucedidos via força bruta. A ferramenta monitora logs em tempo real do sistema e toma medidas de prevenção contra IPs identificados como suspeitos.
 ```tf
 sudo apt-get fail2ben
 
